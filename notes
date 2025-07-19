@@ -1,0 +1,170 @@
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "testpassword123"
+}
+
+
+{
+  "username": "Testuser",
+  "email": "testuser@example.com"
+}
+
+// register 2nd user
+{
+  "username": "testuser2",
+  "email": "testuser2@example.com",
+  "password": "testpassword12"
+}
+
+// login 
+{
+    "username": "testuser2",
+    "password": "testpassword12"
+}
+
+// register
+test2
+test2@example.com
+password2
+
+// login
+test2
+password2
+
+//  register 
+test4
+test4@example.com
+1234567
+
+// register 
+asdf
+asdf@example.com
+1234
+
+
+
+
+
+
+
+
+
+
+🔌 Backend Functionalities to Add (With Placement)
+🔹 1. User Authentication
+Where to add: /users/ app
+Features:
+
+Register (POST)
+
+Login / Logout
+
+JWT or Token-based auth (for React)
+
+Password Reset
+
+Profile Info (GET/UPDATE)
+
+🔧 Tools: djangorestframework, djangorestframework-simplejwt
+
+🔹 2. Product Management
+Where to add: /products/ app
+Features:
+
+Add/Edit/Delete Product (Admin)
+
+View Products (Frontend API)
+
+Search, Filter, Sort Products
+
+Categories & Variants (Size/Color)
+
+Product Image Uploads
+
+📦 Use ImageField with MEDIA_ROOT
+
+🔹 3. Cart & Wishlist
+Where to add: /store/ or new /cart/, /wishlist/ apps
+Features:
+
+Add/Remove products from cart
+
+Update quantity
+
+Save for later (wishlist)
+
+Store in DB (not just in frontend memory)
+
+🔹 4. Order Processing
+Where to add: /orders/ app
+Features:
+
+Place Order
+
+Save Address / Shipping
+
+Order Status: Pending, Shipped, Delivered
+
+Order History (for user)
+
+🔧 Use models like:
+
+python
+Copy
+Edit
+Order, OrderItem, ShippingAddress
+🔹 5. Payment Integration
+Where to add: /payments/ app or inside orders/
+Options:
+
+Stripe (Card Payments)
+
+Cash on Delivery
+
+PayPal (optional)
+
+Use Django views to receive payment confirmation.
+
+🔹 6. Reviews & Ratings
+Where to add: /reviews/ or inside products/
+Features:
+
+Add Rating & Review (1 to 5 stars)
+
+Show Average Rating on Product
+
+🔹 7. Admin Panel for Store Management
+Manage users, products, orders from Django Admin
+
+🔹 8. Newsletter / Contact Form
+Where to add: /contact/ app
+Features:
+
+Save contact form submissions
+
+Optional: Send email with SMTP
+
+🔹 9. Connect React Frontend to Django Backend
+Use Django as REST API provider using Django REST Framework (DRF)
+
+Use Axios or Fetch in React to make API calls
+
+Example API URL:
+
+http
+Copy
+Edit
+http://localhost:8000/api/products/
+🔹 10. Deployment Tools
+Host Backend: PythonAnywhere, Heroku, or VPS (e.g., DigitalOcean)
+
+Host Frontend: Vercel, Netlify, or same server via NGINX
+
+🧠 Final Tips
+Use CORS headers: pip install django-cors-headers to allow frontend requests
+
+Store secret keys and API credentials securely (using .env)
+
+Use token authentication with React for login persistence
+
