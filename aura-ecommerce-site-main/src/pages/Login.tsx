@@ -1,6 +1,7 @@
-// src/pages/Login.tsx (or wherever your pages are)
+// src/pages/Login.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../lib/api";
 import { Link } from "react-router-dom";
@@ -10,6 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const from = location.state?.from?.pathname || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -27,10 +32,20 @@ const Login = () => {
       localStorage.setItem("refreshToken", refreshToken);
 
       alert("Login successful!");
+
+      // ✅ Redirect to previous or default page
+      navigate(from, { replace: true });
     } catch (error) {
       alert("Login failed!");
     }
   };
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      alert("You are already logged in!");
+      navigate("/", { replace: true });
+    }
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-md">
