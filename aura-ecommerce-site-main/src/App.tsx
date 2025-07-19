@@ -6,18 +6,23 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import Index from "./pages/Index";
-import Shop from "./pages/Shop";
-import ProductPage from "./pages/ProductPage";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Wishlist from "./pages/Wishlist";
-import Account from "./pages/Account";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
+
+// Pages
+import Index from "@/pages/Index";
+import Shop from "@/pages/Shop";
+import ProductPage from "@/pages/ProductPage";
+import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
+import Wishlist from "@/pages/Wishlist";
+import Account from "@/pages/Account";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import NotFound from "@/pages/NotFound";
+
+// Private Route Wrapper
+import PrivateRoute from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,20 +37,72 @@ const App = () => (
             <Header />
             <div className="flex-1">
               <Routes>
+                {/* ✅ Public Routes */}
                 <Route path="/" element={<Index />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:id" element={<ProductPage />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="/account" element={<Account />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/category/:category" element={<Shop />} />
-                <Route path="/categories" element={<Shop />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+                {/* ✅ Private Routes */}
+                <Route
+                  path="/shop"
+                  element={
+                    <PrivateRoute>
+                      <Shop />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/category/:category"
+                  element={
+                    <PrivateRoute>
+                      <Shop />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/cart"
+                  element={
+                    <PrivateRoute>
+                      <Cart />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <PrivateRoute>
+                      <Checkout />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/wishlist"
+                  element={
+                    <PrivateRoute>
+                      <Wishlist />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/account"
+                  element={
+                    <PrivateRoute>
+                      <Account />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/product/:id"
+                  element={
+                    <PrivateRoute>
+                      <ProductPage />
+                    </PrivateRoute>
+                  }
+                />
+
+                {/* ❌ Catch-all for Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
