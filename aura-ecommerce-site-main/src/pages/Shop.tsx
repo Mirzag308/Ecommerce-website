@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ProductCard } from "@/components/product-card"
 import { featuredProducts } from "@/data/products"
+import axios from "axios"
+import { BASE_URL } from "@/App"
 
 const Shop = () => {
   const { category } = useParams()
@@ -20,6 +22,7 @@ const Shop = () => {
   const [priceRange, setPriceRange] = useState([0, 500])
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [filtered, setFiltered] = useState([])
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "")
@@ -29,47 +32,66 @@ const Shop = () => {
   const brands = ["Nike", "Adidas", "Apple", "Samsung", "Sony", "Microsoft"]
   const categories = ["Electronics", "Fashion", "Sports", "Home", "Beauty", "Accessories"]
 
+
+  useEffect(() => {
+    try {
+      const response: any = axios.get(`${BASE_URL}/api/products/`);
+      response.then((res: any) => {
+        setFiltered(res.data || [])
+        console.log("Products fetched successfully:", res)
+      })
+
+    } catch (e) {
+      console.error("Error fetching products:", e)
+    }
+
+  }, [])
+
+
+
+
   const filteredProducts = useMemo(() => {
-    let filtered = [...featuredProducts]
+    // let filtered = [...featuredProducts]
+    let filteredP = []
 
     // Filter by category
     if (category) {
-      filtered = filtered.filter(product => 
-        product.category.toLowerCase() === category.toLowerCase()
-      )
+      // filtered = filtered.filter(product =>
+      //   product.category.toLowerCase() === category.toLowerCase()
+      // )
     }
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      // filtered = filtered.filter(product =>
+      //   product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      //   product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      // )
     }
 
     // Filter by price range
-    filtered = filtered.filter(product =>
-      product.price >= priceRange[0] && product.price <= priceRange[1]
-    )
+    // filtered = filtered.filter(product =>
+    //   product.price >= priceRange[0] && product.price <= priceRange[1]
+    // )
 
     // Sort products
-    switch (sortBy) {
-      case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
-      case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
-      case "rating":
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case "newest":
-      default:
-        // Keep original order for newest
-        break
-    }
+    // switch (sortBy) {
+    //   case "price-low":
+    //     filtered.sort((a, b) => a.price - b.price)
+    //     break
+    //   case "price-high":
+    //     filtered.sort((a, b) => b.price - a.price)
+    //     break
+    //   case "rating":
+    //     filtered.sort((a, b) => b.rating - a.rating)
+    //     break
+    //   case "newest":
+    //   default:
+    //     // Keep original order for newest
+    //     break
+    // }
 
-    return filtered
+    return filteredP
   }, [category, searchQuery, priceRange, sortBy])
 
   const FilterSidebar = () => (
@@ -109,7 +131,7 @@ const Shop = () => {
         <div className="space-y-2">
           {brands.map((brand) => (
             <div key={brand} className="flex items-center space-x-2">
-              <Checkbox 
+              <Checkbox
                 id={brand}
                 checked={selectedBrands.includes(brand)}
                 onCheckedChange={(checked) => {
@@ -183,9 +205,9 @@ const Shop = () => {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <Badge variant="secondary">
-                {filteredProducts.length} products
+                {filtered.length} products
               </Badge>
-              
+
               {/* Mobile Filter */}
               <Sheet>
                 <SheetTrigger asChild>
@@ -240,17 +262,16 @@ const Shop = () => {
           </div>
 
           {/* Products Grid */}
-          <div className={`grid gap-6 ${
-            viewMode === "grid" 
-              ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
-              : "grid-cols-1"
-          }`}>
-            {filteredProducts.map((product) => (
+          <div className={`grid gap-6 ${viewMode === "grid"
+            ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+            : "grid-cols-1"
+            }`}>
+            {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
 
-          {filteredProducts.length === 0 && (
+          {filtered.length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
             </div>
