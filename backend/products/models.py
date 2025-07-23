@@ -19,3 +19,13 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='category_images/', blank=True, null=True)  # optional
+    slug = models.SlugField(unique=True)  # optional, for SEO-friendly URL
+
+    def __str__(self):
+        return self.name
+      def __str__(self):
+        return self.name
