@@ -1,3 +1,4 @@
+// App.tsx 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import AdminProducts from "@/pages/admin/AdminProducts";
+import ProductForm from "@/pages/admin/ProductForm";
 
 // Pages
 import Index from "@/pages/Index";
@@ -25,6 +28,8 @@ import NotFound from "@/pages/NotFound";
 import PrivateRoute from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
+
+export const BASE_URL = "http://localhost:8000"; 
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -102,9 +107,15 @@ const App = () => (
                   }
                 />
 
+                {/* ✅ Admin Product Routes */}
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/products/new" element={<ProductForm />} />
+                <Route path="/admin/products/edit/:id" element={<ProductForm />} />
+
                 {/* ❌ Catch-all for Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+
             </div>
             <Footer />
           </div>

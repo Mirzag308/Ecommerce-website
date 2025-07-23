@@ -11,12 +11,12 @@ export interface Product {
   id: string
   name: string
   price: number
-  originalPrice?: number
+  originalPrice: number
   image: string
   category: string
-  rating: number
-  reviews: number
-  inStock: boolean
+  rating?: number
+  reviews?: number
+  inStock?: boolean
   badge?: "Sale" | "New" | "Hot"
 }
 
@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
     })
   }
 
-  const discountPercentage = product.originalPrice 
+  const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0
 
@@ -61,11 +61,11 @@ export function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
         />
-        
+
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.badge && (
-            <Badge 
+            <Badge
               variant={product.badge === "Sale" ? "destructive" : "secondary"}
               className="text-xs font-semibold"
             >
@@ -110,7 +110,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Button
             onClick={handleAddToCart}
-            disabled={!product.inStock}
+            // disabled={!product.inStock}
             className="w-full bg-gradient-primary hover:opacity-90"
             size="sm"
           >
@@ -128,18 +128,17 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
           </Link>
-          
+
           {/* Rating */}
           <div className="flex items-center space-x-1">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(product.rating)
+                  className={`h-3 w-3 ${i < Math.floor(product.rating)
                       ? "fill-yellow-400 text-yellow-400"
                       : "text-gray-300"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
