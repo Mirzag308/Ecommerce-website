@@ -1,57 +1,80 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Heart, ShoppingCart, Star, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { useCart } from "@/store/cart"
-import { toast } from "@/hooks/use-toast"
+import { Link } from "react-router-dom";
+import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCart } from "@/store/cart";
+import { toast } from "@/hooks/use-toast";
+
+import { useWishlist } from "@/store/wishlist";
 
 export interface Product {
-  id: string
-  name: string
-  price: number
-  originalPrice: number
-  image: string
-  category: string
-  rating?: number
-  reviews?: number
-  inStock?: boolean
-  badge?: "Sale" | "New" | "Hot"
+  id: string;
+  name: string;
+  price: number;
+  original_price: number;
+  image: string;
+  category: string;
+  category_name: string;
+  rating?: number;
+  reviews?: number;
+  inStock?: boolean;
+  badge?: "Sale" | "New" | "Hot";
 }
 
 interface ProductCardProps {
-  product: Product
+  product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false)
-  const { addItem } = useCart()
+  // ✅ Cart
+  const { addItem: addToCart } = useCart();
+
+  // ✅ Wishlist
+  const { items: wishlistItems, addItem: addToWishlist, removeItem } = useWishlist();
+  const isWishlisted = wishlistItems.some((i) => i.id === product.id);
 
   const handleAddToCart = () => {
-    addItem({
+    addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
-    })
+    });
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
-    })
-  }
-
+    });
+  };
   const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted)
-    toast({
-      title: isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-      description: `${product.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
-    })
-  }
+    if (isWishlisted) {
+      removeItem(product.id);
+      toast({
+        title: "Removed from wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      });
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        rating: product.rating,
+        reviews: product.reviews,
+        category: product.category,
+        category_name: product.category_name,
+        original_price: product.original_price,
+      });
+      toast({
+        title: "Added to wishlist",
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    }
+  };
 
-  const discountPercentage = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0
+  const discountPercentage = product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    : 0;
 
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
@@ -64,22 +87,22 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {!product.inStock && (
+            <Badge variant="secondary" className="text-xs font-semibold">
+              Out of Stock
+            </Badge>
+          )}
           {product.badge && (
             <Badge
               variant={product.badge === "Sale" ? "destructive" : "secondary"}
-              className="text-xs font-semibold"
+              className="text-xs font-semibold w-1/2"
             >
               {product.badge}
             </Badge>
           )}
           {discountPercentage > 0 && (
-            <Badge variant="destructive" className="text-xs font-semibold">
+            <Badge variant="destructive" className="text-xs font-semibold w-1/2">
               -{discountPercentage}%
-            </Badge>
-          )}
-          {!product.inStock && (
-            <Badge variant="secondary" className="text-xs font-semibold">
-              Out of Stock
             </Badge>
           )}
         </div>
@@ -110,7 +133,6 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Button
             onClick={handleAddToCart}
-            // disabled={!product.inStock}
             className="w-full bg-gradient-primary hover:opacity-90"
             size="sm"
           >
@@ -122,7 +144,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <CardContent className="p-4">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">{product.category}</p>
+          <p className="text-sm text-muted-foreground">{product.category_name}</p>
           <Link to={`/product/${product.id}`}>
             <h3 className="font-semibold text-sm hover:text-primary transition-colors line-clamp-2">
               {product.name}
@@ -150,14 +172,14 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Price */}
           <div className="flex items-center space-x-2">
             <span className="font-bold text-lg">${product.price}</span>
-            {product.originalPrice && (
+            {product.original_price && (
               <span className="text-sm text-muted-foreground line-through">
-                ${product.originalPrice}
+                ${product.original_price}
               </span>
             )}
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

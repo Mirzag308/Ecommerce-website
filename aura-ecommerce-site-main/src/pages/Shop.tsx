@@ -1,170 +1,124 @@
-import { useState, useMemo, useEffect } from "react"
-import { useParams, useSearchParams } from "react-router-dom"
-import { Filter, Grid, List, SlidersHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { ProductCard } from "@/components/product-card"
-import { featuredProducts } from "@/data/products"
-import axios from "axios"
-import { BASE_URL } from "@/App"
+// Shop.tsx 
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ProductCard } from "@/components/product-card";
+import axios from "axios";
+import { BASE_URL } from "@/App";
 
 const Shop = () => {
-  const { category } = useParams()
-  const [searchParams] = useSearchParams()
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [sortBy, setSortBy] = useState("newest")
-  const [priceRange, setPriceRange] = useState([0, 500])
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filtered, setFiltered] = useState([])
+  const { category } = useParams();
+  const [searchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState("newest");
+  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<any[]>([]);
+
+  const brands = ["Nike", "Adidas", "Apple", "Samsung", "Sony", "Microsoft"];
 
   useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "")
-  }, [searchParams])
+    setSearchQuery(searchParams.get("q") || "");
+  }, [searchParams]);
 
-
-  const brands = ["Nike", "Adidas", "Apple", "Samsung", "Sony", "Microsoft"]
-  const categories = ["Electronics", "Fashion", "Sports", "Home", "Beauty", "Accessories"]
-
-
+  // ✅ Fetch products
   useEffect(() => {
-    try {
-      const response: any = axios.get(`${BASE_URL}/api/products/`);
-      response.then((res: any) => {
-        setFiltered(res.data || [])
-        console.log("Products fetched successfully:", res)
-      })
+    const fetchProducts = async () => {
+      try {
+        const url = category
+          ? `${BASE_URL}/api/products/products/?category=${category}`
+          : `${BASE_URL}/api/products/products/`;
 
-    } catch (e) {
-      console.error("Error fetching products:", e)
-    }
+        const res = await axios.get(url);
+        const fetchedProducts = Array.isArray(res.data) ? res.data : res.data.results || [];
+        setProducts(fetchedProducts);
+        setFiltered(fetchedProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, [category]);
 
-  }, [])
+  // ✅ Apply filters and sorting
+  useEffect(() => {
+    let data = [...products];
 
-
-
-
-  const filteredProducts = useMemo(() => {
-    // let filtered = [...featuredProducts]
-    let filteredP = []
-
-    // Filter by category
-    if (category) {
-      // filtered = filtered.filter(product =>
-      //   product.category.toLowerCase() === category.toLowerCase()
-      // )
-    }
-
-    // Filter by search query
+    // 🔍 Search filter
     if (searchQuery) {
-      // filtered = filtered.filter(product =>
-      //   product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      //   product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      // )
+      data = data.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
     }
 
-    // Filter by price range
-    // filtered = filtered.filter(product =>
-    //   product.price >= priceRange[0] && product.price <= priceRange[1]
-    // )
+    // 💰 Price range filter
+    data = data.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
-    // Sort products
-    // switch (sortBy) {
-    //   case "price-low":
-    //     filtered.sort((a, b) => a.price - b.price)
-    //     break
-    //   case "price-high":
-    //     filtered.sort((a, b) => b.price - a.price)
-    //     break
-    //   case "rating":
-    //     filtered.sort((a, b) => b.rating - a.rating)
-    //     break
-    //   case "newest":
-    //   default:
-    //     // Keep original order for newest
-    //     break
-    // }
+    // 🏷 Brand filter
+    if (selectedBrands.length > 0) {
+      data = data.filter((p) => selectedBrands.includes(p.brand));
+    }
 
-    return filteredP
-  }, [category, searchQuery, priceRange, sortBy])
+    // 🔽 Sorting
+    if (sortBy === "newest") {
+      data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortBy === "price-low") {
+      data.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      data.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "rating") {
+      data.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
+    setFiltered(data);
+  }, [searchQuery, priceRange, selectedBrands, sortBy, products]);
+
+  const toggleBrand = (brand: string) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+    );
+  };
 
   const FilterSidebar = () => (
     <div className="space-y-6">
+      {/* Price Filter */}
       <div>
-        <h3 className="font-semibold mb-3">Price Range</h3>
+        <h3 className="font-semibold mb-2">Price Range</h3>
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          max={500}
-          min={0}
+          max={1000}
           step={10}
           className="mb-2"
         />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
-        </div>
+        <p>${priceRange[0]} - ${priceRange[1]}</p>
       </div>
 
+      {/* Brand Filter */}
       <div>
-        <h3 className="font-semibold mb-3">Categories</h3>
-        <div className="space-y-2">
-          {categories.map((cat) => (
-            <div key={cat} className="flex items-center space-x-2">
-              <Checkbox id={cat} />
-              <label htmlFor={cat} className="text-sm cursor-pointer">
-                {cat}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-3">Brands</h3>
+        <h3 className="font-semibold mb-2">Brands</h3>
         <div className="space-y-2">
           {brands.map((brand) => (
             <div key={brand} className="flex items-center space-x-2">
               <Checkbox
-                id={brand}
                 checked={selectedBrands.includes(brand)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedBrands([...selectedBrands, brand])
-                  } else {
-                    setSelectedBrands(selectedBrands.filter(b => b !== brand))
-                  }
-                }}
+                onCheckedChange={() => toggleBrand(brand)}
               />
-              <label htmlFor={brand} className="text-sm cursor-pointer">
-                {brand}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-3">Rating</h3>
-        <div className="space-y-2">
-          {[4, 3, 2, 1].map((rating) => (
-            <div key={rating} className="flex items-center space-x-2">
-              <Checkbox id={`rating-${rating}`} />
-              <label htmlFor={`rating-${rating}`} className="text-sm cursor-pointer">
-                {rating}+ Stars
-              </label>
+              <span>{brand}</span>
             </div>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -187,7 +141,7 @@ const Shop = () => {
 
       <div className="flex gap-8">
         {/* Desktop Filters */}
-        <div className="hidden lg:block w-64 flex-shrink-0">
+        {/* <div className="hidden lg:block w-64 flex-shrink-0">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -197,7 +151,7 @@ const Shop = () => {
               <FilterSidebar />
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
         {/* Main Content */}
         <div className="flex-1">
@@ -266,7 +220,7 @@ const Shop = () => {
             ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
             : "grid-cols-1"
             }`}>
-            {filtered.map((product) => (
+            {Array.isArray(filtered) && filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
@@ -279,7 +233,7 @@ const Shop = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Shop
+export default Shop;

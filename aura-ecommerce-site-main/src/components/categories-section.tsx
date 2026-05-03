@@ -1,11 +1,51 @@
-// categories-section.tsx 
+// categories-section.tsx
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { categories } from "@/data/products"
+
+// ✅ Define TypeScript type for category
+interface Category {
+  id: number
+  name: string
+  image: string
+  productCount: number
+  slug: string
+}
 
 export function CategoriesSection() {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // ✅ Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/products/categories/");
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories()
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="py-16 text-center">
+        <p className="text-lg font-semibold">Loading categories...</p>
+      </section>
+    )
+  }
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -21,10 +61,10 @@ export function CategoriesSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <Card key={category.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <Card key={category.name} className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
               <div className="relative overflow-hidden h-48">
                 <img
-                  src={category.image}
+                  src={category.image} // ✅ Django media URL
                   alt={category.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
@@ -35,7 +75,7 @@ export function CategoriesSection() {
                 </div>
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Button size="icon" variant="secondary" className="rounded-full h-8 w-8" asChild>
-                    <Link to={category.href}>
+                    <Link to={`/category/${category.name}`}>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
@@ -43,7 +83,7 @@ export function CategoriesSection() {
               </div>
               <CardContent className="p-0">
                 <Button asChild variant="ghost" className="w-full justify-between p-4 h-auto">
-                  <Link to={category.href}>
+                  <Link to={`/category/${category.slug}`}>
                     <span>View All {category.name}</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>

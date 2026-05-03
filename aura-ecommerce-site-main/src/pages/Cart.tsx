@@ -1,3 +1,4 @@
+// src/pages/Cart.tsx
 import { Link } from "react-router-dom"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -148,10 +149,10 @@ const Cart = () => {
               </div>
 
               <div className="space-y-3">
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <Input placeholder="Coupon code" />
                   <Button variant="outline">Apply</Button>
-                </div>
+                </div> */}
                 
                 <Button asChild className="w-full bg-gradient-primary text-lg py-6">
                   <Link to="/checkout">Proceed to Checkout</Link>
